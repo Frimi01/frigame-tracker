@@ -13,6 +13,7 @@ const gameTimerDisplay = document.getElementById('game-timer');
 const countdownDisplay = document.getElementById('countdown');
 const applyButton = document.getElementById('apply-initial');
 const pauseResumeButton = document.getElementById('pause-resume');
+const resetPointsButton = document.getElementById('btn-reset-points');
 const targetTimeInput = document.getElementById('target-time');
 const targetIntervalInput = document.getElementById('target-interval');
 
@@ -75,6 +76,10 @@ applyButton.addEventListener('click', () => {
 pauseResumeButton.addEventListener('click', () => {
     isPaused = !isPaused;
     pauseResumeButton.textContent = isPaused ? 'Resume' : 'Pause';
+resetPointsButton.addEventListener('click', () => {
+    document.querySelectorAll('.player').forEach(player => {
+        player.querySelector('.points').textContent = 0;
+    });
 });
 
 document.querySelectorAll('.player').forEach(player => {
