@@ -24,6 +24,58 @@ function formatTime(seconds) {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
+function saveState() {
+    const points = {};
+    document.querySelectorAll('.player').forEach(player => {
+        const id = player.dataset.id;
+        const pts = parseInt(player.querySelector('.points').textContent) || 0;
+        if (id) points[id] = pts;
+    });
+
+    localStorage.setItem('gameState', JSON.stringify({
+        gameTimeSeconds,
+        intervalTimeSeconds,
+        gameTimeRemaining,
+        intervalTimeRemaining,
+        isPaused,
+        isOvertime,
+        points
+    }));
+}
+
+function loadState() {
+    const raw = localStorage.getItem('gameState');
+    if (!raw) return;
+
+    const state = JSON.parse(raw);
+    gameTimeSeconds = state.gameTimeSeconds ?? 0;
+    intervalTimeSeconds = state.intervalTimeSeconds ?? 0;
+    gameTimeRemaining = state.gameTimeRemaining ?? 0;
+    intervalTimeRemaining = state.intervalTimeRemaining ?? 0;
+    isPaused = state.isPaused ?? false;
+    isOvertime = state.isOvertime ?? false;
+
+    // Restore points
+    document.querySelectorAll('.player').forEach(player => {
+        const id = player.dataset.id;
+        if (id && state.points?.[id] !== undefined) {
+            player.querySelector('.points').textContent = state.points[id];
+        }
+    });
+
+    // Restore displays
+    gameTimerDisplay.textContent = formatTime(gameTimeRemaining);
+    countdownDisplay.textContent = formatTime(intervalTimeRemaining);
+    if (isOvertime) gameTimerDisplay.style.color = 'red';
+
+    // Restore pause button label and restart timers if a game was in progress
+    if (gameTimeSeconds > 0) {
+        pauseResumeButton.textContent = isPaused ? 'Resume' : 'Pause';
+        startTimers();
+    }
+}
+
+
 function startTimers() {
     if (gameTimerInterval) clearInterval(gameTimerInterval);
     if (intervalTimerInterval) clearInterval(intervalTimerInterval);
@@ -37,16 +89,16 @@ function startTimers() {
         if (!isPaused) {
             if (isOvertime) {
                 gameTimeRemaining++;
-                gameTimerDisplay.textContent = formatTime(gameTimeRemaining);
             } else {
                 gameTimeRemaining--;
-                gameTimerDisplay.textContent = formatTime(gameTimeRemaining);
                 if (gameTimeRemaining <= 0) {
                     gameTimerDisplay.style.color = 'red';
                     isOvertime = true;
                     alarmRuinNoise.play();
                 }
             }
+            gameTimerDisplay.textContent = formatTime(gameTimeRemaining);
+            saveState();
         }
     }, 1000);
 
@@ -54,13 +106,15 @@ function startTimers() {
         if (!isPaused) {
             intervalTimeRemaining--;
             if (intervalTimeRemaining < 0) {
-                intervalTimeRemaining = intervalTimeSeconds -1;
+                intervalTimeRemaining = intervalTimeSeconds - 1;
                 alarmNoise.play();
             }
             countdownDisplay.textContent = formatTime(intervalTimeRemaining);
+            saveState();
         }
     }, 1000);
 }
+
 
 applyButton.addEventListener('click', () => {
     gameTimeSeconds = parseFloat(targetTimeInput.value) * 60 || 0;
@@ -71,16 +125,21 @@ applyButton.addEventListener('click', () => {
     gameTimerDisplay.textContent = formatTime(gameTimeRemaining);
     countdownDisplay.textContent = formatTime(intervalTimeRemaining);
 
+    saveState();
     startTimers();
 });
 
 pauseResumeButton.addEventListener('click', () => {
     isPaused = !isPaused;
     pauseResumeButton.textContent = isPaused ? 'Resume' : 'Pause';
+    saveState();
+});
+
 resetPointsButton.addEventListener('click', () => {
     document.querySelectorAll('.player').forEach(player => {
         player.querySelector('.points').textContent = 0;
     });
+    saveState();
 });
 
 document.querySelectorAll('.player').forEach(player => {
@@ -92,6 +151,7 @@ document.querySelectorAll('.player').forEach(player => {
             const pointsDisplay = player.querySelector('.points');
             let currentPoints = parseInt(pointsDisplay.textContent) || 0;
             pointsDisplay.textContent = currentPoints + 1;
+            saveState();
         }
     });
     player.addEventListener('contextmenu', (e) => {
@@ -99,5 +159,8 @@ document.querySelectorAll('.player').forEach(player => {
         const pointsDisplay = player.querySelector('.points');
         let currentPoints = parseInt(pointsDisplay.textContent) || 0;
         pointsDisplay.textContent = Math.max(0, currentPoints - 1);
+        saveState();
     });
 });
+
+loadState();
