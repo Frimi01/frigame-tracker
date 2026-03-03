@@ -1,0 +1,122 @@
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+    color: black;
+}
+
+.players {
+    display: grid;
+    grid-template-columns: auto auto;
+}
+
+.players .player {
+    background-color: lightblue;
+    border: 1px solid black;
+    margin: 10px;
+    padding: 60px;
+    text-align: center;
+}
+
+.player:hover {
+    background-color: lightgreen;
+    cursor: pointer;
+}
+
+#removed-player > div {
+    background-color: lightgray;
+    padding: 20px;
+    margin: 10px;
+    text-align: center;
+    width: 100px;
+}
+
+#timers {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    align-items: center;
+    margin: 40px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+#game-timer,
+#countdown {
+    font-size: 48px;
+    font-weight: 700;
+    font-family:  monospace;
+    color: white;
+    padding: 20px 40px;
+    min-width: 180px;
+    text-align: center;
+    letter-spacing: 2px;
+    background: lightgreen;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    background-color: lightgreen;
+    margin-top: 30px;
+}
+
+/*body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+    color: black;
+}
+
+.controls {
+    margin-bottom: 12px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.players {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+}
+
+.player {
+    background: #f4f4f6;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.player:hover {
+    background-color: lightgreen;
+}
+
+.player.active {
+    box-shadow: 0 0 0 3px rgba(0,120,200,0.12);
+    border-left: 4px solid #0078d4;
+}
+
+.countdown {
+    font-family: monospace;
+    font-weight: 600;
+    background: #222;
+    color: #fff;
+    padding: 6px 8px;
+    border-radius: 4px;
+    min-width: 64px;
+    text-align: center;
+}*/
