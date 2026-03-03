@@ -6,15 +6,16 @@ let gameTimerInterval = null;
 let intervalTimerInterval = null;
 let isPaused = false;
 let isOvertime = false;
+let isAllocating = false;
 let alarmNoise = new Audio('alarm.mp3');
 let alarmRuinNoise = new Audio('alarmRuin.mp3');
 
 const gameTimerDisplay = document.getElementById('game-timer');
 const countdownDisplay = document.getElementById('countdown');
-const applyButton = document.getElementById('apply-initial');
 const applyButton = document.getElementById('btn-apply-initial');
 const pauseResumeButton = document.getElementById('btn-pause-resume');
 const resetPointsButton = document.getElementById('btn-reset-points');
+const allocatePlayersButton = document.getElementById('btn-allocate-players');
 const targetTimeInput = document.getElementById('target-time');
 const targetIntervalInput = document.getElementById('target-interval');
 
