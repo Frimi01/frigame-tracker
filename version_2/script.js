@@ -4,6 +4,7 @@ let gameTimeRemaining = 0;
 let intervalTimeRemaining = 0;
 let gameTimerInterval = null;
 let intervalTimerInterval = null;
+let intervalCounter = 0;
 let isPaused = false;
 let isOvertime = false;
 let isAllocating = false;
@@ -18,6 +19,7 @@ const resetPointsButton = document.getElementById('btn-reset-points');
 const allocatePlayersButton = document.getElementById('btn-allocate-players');
 const targetTimeInput = document.getElementById('target-time');
 const targetIntervalInput = document.getElementById('target-interval');
+const intervalCounterDisplay = document.getElementById('interval-counter');
 
 function formatTime(seconds) {
     const mins = Math.floor(seconds / 60);
@@ -40,6 +42,7 @@ function saveState() {
         intervalTimeRemaining,
         isPaused,
         isOvertime,
+        intervalCounter,
         points
     }));
 }
@@ -54,6 +57,7 @@ function loadState() {
     gameTimeRemaining = state.gameTimeRemaining ?? 0;
     intervalTimeRemaining = state.intervalTimeRemaining ?? 0;
     isPaused = state.isPaused ?? false;
+    intervalCounter = state.intervalCounter ?? 0;
     isOvertime = state.isOvertime ?? false;
 
     // Restore points
@@ -80,6 +84,7 @@ function startTimers() {
     if (intervalTimerInterval) clearInterval(intervalTimerInterval);
 
     pauseResumeButton.textContent = 'Pause';
+    intervalCounterDisplay.textContent = `Intervals passed: ${intervalCounter}`;
 
     gameTimerInterval = setInterval(() => {
         if (!isPaused) {
@@ -104,6 +109,8 @@ function startTimers() {
             if (intervalTimeRemaining < 0) {
                 intervalTimeRemaining = intervalTimeSeconds - 1;
                 alarmNoise.play();
+                intervalCounter ++;
+                intervalCounterDisplay.textContent = `Intervals passed: ${intervalCounter}`;
             }
             countdownDisplay.textContent = formatTime(intervalTimeRemaining);
             saveState();
@@ -124,6 +131,7 @@ applyButton.addEventListener('click', () => {
     isPaused = false;
     isOvertime = false;
     gameTimerDisplay.style.color = 'white';
+    intervalCounter = 0;
     saveState();
     startTimers();
 });
