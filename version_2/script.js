@@ -79,10 +79,7 @@ function startTimers() {
     if (gameTimerInterval) clearInterval(gameTimerInterval);
     if (intervalTimerInterval) clearInterval(intervalTimerInterval);
 
-    isPaused = false;
-    isOvertime = false;
     pauseResumeButton.textContent = 'Pause';
-    gameTimerDisplay.style.color = 'white';
 
     gameTimerInterval = setInterval(() => {
         if (!isPaused) {
@@ -124,6 +121,9 @@ applyButton.addEventListener('click', () => {
     gameTimerDisplay.textContent = formatTime(gameTimeRemaining);
     countdownDisplay.textContent = formatTime(intervalTimeRemaining);
 
+    isPaused = false;
+    isOvertime = false;
+    gameTimerDisplay.style.color = 'white';
     saveState();
     startTimers();
 });
