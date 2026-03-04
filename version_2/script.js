@@ -145,17 +145,20 @@ allocatePlayersButton.addEventListener('click', () => {
     isAllocating = !isAllocating;
     allocatePlayersButton.style.backgroundColor = isAllocating ? 'red' : 'lightgreen'
 })
+
 document.querySelectorAll('.player').forEach(player => {
     player.addEventListener('click', (e) => {
         e.preventDefault();
-        if (e.button === 1 || e.buttons === 4) {
-            console.log('middle mouse');
+        if (isAllocating && player.parentElement.id === 'removed-players') {
+            document.getElementById('active-players').appendChild(player);
+        } else if (isAllocating && player.parentElement.id === 'active-players') {
+            document.getElementById('removed-players').appendChild(player);
         } else {
             const pointsDisplay = player.querySelector('.points');
             let currentPoints = parseInt(pointsDisplay.textContent) || 0;
             pointsDisplay.textContent = currentPoints + 1;
-            saveState();
         }
+        saveState();
     });
     player.addEventListener('contextmenu', (e) => {
         e.preventDefault();
