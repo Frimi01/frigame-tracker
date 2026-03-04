@@ -141,6 +141,10 @@ resetPointsButton.addEventListener('click', () => {
     saveState();
 });
 
+allocatePlayersButton.addEventListener('click', () => {
+    isAllocating = !isAllocating;
+    allocatePlayersButton.style.backgroundColor = isAllocating ? 'red' : 'lightgreen'
+})
 document.querySelectorAll('.player').forEach(player => {
     player.addEventListener('click', (e) => {
         e.preventDefault();
