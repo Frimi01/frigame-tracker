@@ -7,12 +7,12 @@ body {
     color: black;
 }
 
-.players {
+#active-players {
     display: grid;
     grid-template-columns: auto auto;
 }
 
-.players .player {
+#active-players .player {
     background-color: lightblue;
     border: 1px solid black;
     margin: 10px;
@@ -25,7 +25,7 @@ body {
     cursor: pointer;
 }
 
-#removed-player > div {
+#removed-players > div {
     background-color: lightgray;
     padding: 20px;
     margin: 10px;
