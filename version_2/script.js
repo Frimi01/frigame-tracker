@@ -40,7 +40,6 @@ function saveState() {
         intervalTimeSeconds,
         gameTimeRemaining,
         intervalTimeRemaining,
-        isPaused,
         isOvertime,
         intervalCounter,
         points
@@ -56,9 +55,11 @@ function loadState() {
     intervalTimeSeconds = state.intervalTimeSeconds ?? 0;
     gameTimeRemaining = state.gameTimeRemaining ?? 0;
     intervalTimeRemaining = state.intervalTimeRemaining ?? 0;
-    isPaused = state.isPaused ?? false;
     intervalCounter = state.intervalCounter ?? 0;
     isOvertime = state.isOvertime ?? false;
+
+    // Paused is true by default to force sounds to function on load, since some browsers block audio until user interaction
+    isPaused = true;
 
     // Restore points
     document.querySelectorAll('.player').forEach(player => {
@@ -73,17 +74,15 @@ function loadState() {
     countdownDisplay.textContent = formatTime(intervalTimeRemaining);
     if (isOvertime) gameTimerDisplay.style.color = 'red';
 
-    // Restore pause button label and restart timers if a game was in progress
+    // Restore pause button label and restart timers if a game was in progress (depricated: isPaused will now always be true)
     pauseResumeButton.textContent = isPaused ? 'Resume' : 'Pause';
-    startTimers();
 }
+
 
 
 function startTimers() {
     if (gameTimerInterval) clearInterval(gameTimerInterval);
     if (intervalTimerInterval) clearInterval(intervalTimerInterval);
-
-    pauseResumeButton.textContent = 'Pause';
     intervalCounterDisplay.textContent = `Intervals passed: ${intervalCounter}`;
 
     gameTimerInterval = setInterval(() => {
@@ -116,7 +115,9 @@ function startTimers() {
             saveState();
         }
     }, 1000);
+
 }
+
 
 
 applyButton.addEventListener('click', () => {
@@ -131,6 +132,7 @@ applyButton.addEventListener('click', () => {
     isPaused = false;
     isOvertime = false;
     gameTimerDisplay.style.color = 'white';
+    pauseResumeButton.textContent = 'Pause';
     intervalCounter = 0;
     saveState();
     startTimers();
@@ -178,3 +180,6 @@ document.querySelectorAll('.player').forEach(player => {
 });
 
 loadState();
+if (gameTimeSeconds > 0 && intervalTimeSeconds > 0) {
+    startTimers();
+}
