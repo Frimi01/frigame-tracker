@@ -70,10 +70,8 @@ function loadState() {
     if (isOvertime) gameTimerDisplay.style.color = 'red';
 
     // Restore pause button label and restart timers if a game was in progress
-    if (gameTimeSeconds > 0) {
-        pauseResumeButton.textContent = isPaused ? 'Resume' : 'Pause';
-        startTimers();
-    }
+    pauseResumeButton.textContent = isPaused ? 'Resume' : 'Pause';
+    startTimers();
 }
 
 
