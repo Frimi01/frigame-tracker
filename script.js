@@ -1,9 +1,9 @@
+let players = [];
 let gameTimeSeconds = 0;
 let intervalTimeSeconds = 0;
 let gameTimeRemaining = 0;
 let intervalTimeRemaining = 0;
-let gameTimerInterval = null;
-let intervalTimerInterval = null;
+let intervalClock = null;
 let intervalCounter = 0;
 let isPaused = false;
 let isOvertime = false;
@@ -17,9 +17,13 @@ const applyButton = document.getElementById('btn-apply-initial');
 const pauseResumeButton = document.getElementById('btn-pause-resume');
 const resetPointsButton = document.getElementById('btn-reset-points');
 const allocatePlayersButton = document.getElementById('btn-allocate-players');
+const addPlayerButton = document.getElementById('btn-add-player');
+const removePlayerButton = document.getElementById('btn-remove-player')
 const targetTimeInput = document.getElementById('target-time');
 const targetIntervalInput = document.getElementById('target-interval');
 const intervalCounterDisplay = document.getElementById('interval-counter');
+const removedPlayersElement = document.getElementById("removed-players");
+const activePlayersElement = document.getElementById("active-players");
 
 function formatTime(seconds) {
     const mins = Math.floor(seconds / 60);
@@ -44,6 +48,14 @@ function saveState() {
         intervalCounter,
         points
     }));
+}
+
+function savePlayers() {
+    let isAllocated = [];
+    document.querySelectorAll('#active-players .player').forEach(player => {
+        isAllocated.push(player.dataset.id);
+    });
+    localStorage.setItem('players', JSON.stringify({ players, isAllocated }));
 }
 
 function loadState() {
@@ -81,11 +93,10 @@ function loadState() {
 
 
 function startTimers() {
-    if (gameTimerInterval) clearInterval(gameTimerInterval);
-    if (intervalTimerInterval) clearInterval(intervalTimerInterval);
+    if (intervalClock) clearInterval(intervalClock);
     intervalCounterDisplay.textContent = `Intervals passed: ${intervalCounter}`;
 
-    gameTimerInterval = setInterval(() => {
+    intervalClock = setInterval(() => {
         if (!isPaused) {
             if (isOvertime) {
                 gameTimeRemaining++;
@@ -97,72 +108,119 @@ function startTimers() {
                     alarmRuinNoise.play();
                 }
             }
-            gameTimerDisplay.textContent = formatTime(gameTimeRemaining);
-            saveState();
-        }
-    }, 1000);
 
-    intervalTimerInterval = setInterval(() => {
-        if (!isPaused) {
             intervalTimeRemaining--;
             if (intervalTimeRemaining < 0) {
                 intervalTimeRemaining = intervalTimeSeconds - 1;
                 alarmNoise.play();
-                intervalCounter ++;
+                intervalCounter++;
                 intervalCounterDisplay.textContent = `Intervals passed: ${intervalCounter}`;
             }
+            gameTimerDisplay.textContent = formatTime(gameTimeRemaining);
             countdownDisplay.textContent = formatTime(intervalTimeRemaining);
             saveState();
         }
-    }, 1000);
-
+    },1000);
 }
 
 
+function initializeEvents(){
+    applyButton.addEventListener('click', () => {
+        gameTimeSeconds = parseFloat(targetTimeInput.value) * 60 || 0;
+        intervalTimeSeconds = parseFloat(targetIntervalInput.value) * 60 || 0;
+        gameTimeRemaining = gameTimeSeconds;
+        intervalTimeRemaining = intervalTimeSeconds;
 
-applyButton.addEventListener('click', () => {
-    gameTimeSeconds = parseFloat(targetTimeInput.value) * 60 || 0;
-    intervalTimeSeconds = parseFloat(targetIntervalInput.value) * 60 || 0;
-    gameTimeRemaining = gameTimeSeconds;
-    intervalTimeRemaining = intervalTimeSeconds;
+        gameTimerDisplay.textContent = formatTime(gameTimeRemaining);
+        countdownDisplay.textContent = formatTime(intervalTimeRemaining);
 
-    gameTimerDisplay.textContent = formatTime(gameTimeRemaining);
-    countdownDisplay.textContent = formatTime(intervalTimeRemaining);
-
-    isPaused = false;
-    isOvertime = false;
-    gameTimerDisplay.style.color = 'white';
-    pauseResumeButton.textContent = 'Pause';
-    intervalCounter = 0;
-    saveState();
-    startTimers();
-});
-
-pauseResumeButton.addEventListener('click', () => {
-    isPaused = !isPaused;
-    pauseResumeButton.textContent = isPaused ? 'Resume' : 'Pause';
-    saveState();
-});
-
-resetPointsButton.addEventListener('click', () => {
-    document.querySelectorAll('.player').forEach(player => {
-        player.querySelector('.points').textContent = 0;
+        isPaused = false;
+        isOvertime = false;
+        gameTimerDisplay.style.color = 'white';
+        pauseResumeButton.textContent = 'Pause';
+        intervalCounter = 0;
+        saveState();
+        startTimers();
     });
-    saveState();
-});
 
-allocatePlayersButton.addEventListener('click', () => {
-    isAllocating = !isAllocating;
-    allocatePlayersButton.style.backgroundColor = isAllocating ? 'red' : 'lightgreen'
-})
+    pauseResumeButton.addEventListener('click', () => {
+        isPaused = !isPaused;
+        pauseResumeButton.textContent = isPaused ? 'Resume' : 'Pause';
+        saveState();
+    });
 
-document.querySelectorAll('.player').forEach(player => {
+    resetPointsButton.addEventListener('click', () => {
+        document.querySelectorAll('.player').forEach(player => {
+            player.querySelector('.points').textContent = 0;
+        });
+        saveState();
+    });
+
+    allocatePlayersButton.addEventListener('click', () => {
+        if (isAllocating) savePlayers(); // Saves upon exit
+        isAllocating = !isAllocating;
+        allocatePlayersButton.style.backgroundColor = isAllocating ? 'red' : 'lightgreen'
+    })
+
+    addPlayerButton.addEventListener('click', () => {
+        const name = prompt('Player name:');
+        if (name && !players.includes(name)) {
+            players.push(name);
+            savePlayers();
+            createPlayerElement(name);
+        }
+    });
+
+    removePlayerButton.addEventListener('click', () => {
+        const name = prompt('Remove player name:');
+        if (!name) return;
+        players = players.filter(p => p !== name);
+        savePlayers();
+        document.querySelectorAll('.player').forEach(el => {
+            if (el.dataset.id === name) el.remove();
+        });
+    });
+}
+
+function initializePlayers() {
+    const raw = JSON.parse(localStorage.getItem('players') || '{}');
+    players = raw.players || [];
+    const isAllocated = raw.isAllocated || [];
+
+    players.forEach(name => {
+        createPlayerElement(name, isAllocated.includes(name));
+    });
+}
+
+function createPlayerElement(name, allocated = false) {
+    const playerElement = document.createElement("div");
+    const pointsElement = document.createElement("div");
+
+    playerElement.textContent = name;
+    playerElement.setAttribute("data-id", name);
+    playerElement.classList.add("player");
+
+    pointsElement.classList.add("points");
+    pointsElement.textContent = "0";
+
+    playerElement.appendChild(pointsElement);
+
+    if (allocated) {
+        activePlayersElement.appendChild(playerElement);
+    } else {
+        removedPlayersElement.appendChild(playerElement);
+    }
+
+    attachPlayerListeners(playerElement);
+}
+
+function attachPlayerListeners(player){
     player.addEventListener('click', (e) => {
         e.preventDefault();
         if (isAllocating && player.parentElement.id === 'removed-players') {
-            document.getElementById('active-players').appendChild(player);
+            activePlayersElement.appendChild(player);
         } else if (isAllocating && player.parentElement.id === 'active-players') {
-            document.getElementById('removed-players').appendChild(player);
+            removedPlayersElement.appendChild(player);
         } else {
             const pointsDisplay = player.querySelector('.points');
             let currentPoints = parseInt(pointsDisplay.textContent) || 0;
@@ -177,8 +235,11 @@ document.querySelectorAll('.player').forEach(player => {
         pointsDisplay.textContent = Math.max(0, currentPoints - 1);
         saveState();
     });
-});
+}
 
+
+initializePlayers();
+initializeEvents();
 loadState();
 // Prevents timers from starting while paramaters are uninitialized.
 if (gameTimeSeconds > 0 && intervalTimeSeconds > 0) {
