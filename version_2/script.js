@@ -74,7 +74,7 @@ function loadState() {
     countdownDisplay.textContent = formatTime(intervalTimeRemaining);
     if (isOvertime) gameTimerDisplay.style.color = 'red';
 
-    // Restore pause button label and restart timers if a game was in progress (depricated: isPaused will now always be true)
+    // Restore pause button label and restart timers if a game was in progress (deprecated: isPaused will now always be true)
     pauseResumeButton.textContent = isPaused ? 'Resume' : 'Pause';
 }
 
@@ -180,6 +180,7 @@ document.querySelectorAll('.player').forEach(player => {
 });
 
 loadState();
+// Prevents timers from starting while paramaters are uninitialized.
 if (gameTimeSeconds > 0 && intervalTimeSeconds > 0) {
     startTimers();
 }
