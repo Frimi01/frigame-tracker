@@ -8,6 +8,7 @@ let intervalCounter = 0;
 let isPaused = false;
 let isOvertime = false;
 let isAllocating = false;
+let isRemovingPlayer = false;
 let alarmNoise = new Audio('alarm.mp3');
 let alarmRuinNoise = new Audio('alarmRuin.mp3');
 
@@ -157,7 +158,10 @@ function initializeEvents(){
     });
 
     allocatePlayersButton.addEventListener('click', () => {
-        if (isAllocating) savePlayers(); // Saves upon exit
+        if (isAllocating) { // saves upon toggle off
+            savePlayers();
+            saveState();
+        }
         isAllocating = !isAllocating;
         allocatePlayersButton.style.backgroundColor = isAllocating ? 'red' : 'lightgreen'
     })
@@ -172,13 +176,12 @@ function initializeEvents(){
     });
 
     removePlayerButton.addEventListener('click', () => {
-        const name = prompt('Remove player name:');
-        if (!name) return;
-        players = players.filter(p => p !== name);
-        savePlayers();
-        document.querySelectorAll('.player').forEach(el => {
-            if (el.dataset.id === name) el.remove();
-        });
+        if (isRemovingPlayer) { // saves upon toggle off
+            savePlayers();
+            saveState();
+        }
+        isRemovingPlayer = !isRemovingPlayer
+        removePlayerButton.style.backgroundColor = isRemovingPlayer? 'red' : 'lightgreen'
     });
 }
 
@@ -217,16 +220,21 @@ function createPlayerElement(name, allocated = false) {
 function attachPlayerListeners(player){
     player.addEventListener('click', (e) => {
         e.preventDefault();
-        if (isAllocating && player.parentElement.id === 'removed-players') {
-            activePlayersElement.appendChild(player);
-        } else if (isAllocating && player.parentElement.id === 'active-players') {
-            removedPlayersElement.appendChild(player);
+        if (isRemovingPlayer) {
+            player.remove()
+            players = players.filter(p => p !== player.dataset.id);
         } else {
-            const pointsDisplay = player.querySelector('.points');
-            let currentPoints = parseInt(pointsDisplay.textContent) || 0;
-            pointsDisplay.textContent = currentPoints + 1;
+            if (isAllocating && player.parentElement.id === 'removed-players') {
+                activePlayersElement.appendChild(player);
+            } else if (isAllocating && player.parentElement.id === 'active-players') {
+                removedPlayersElement.appendChild(player);
+            } else {
+                const pointsDisplay = player.querySelector('.points');
+                let currentPoints = parseInt(pointsDisplay.textContent) || 0;
+                pointsDisplay.textContent = currentPoints + 1;
+            }
         }
-        saveState();
+        // Saves upon button press
     });
     player.addEventListener('contextmenu', (e) => {
         e.preventDefault();
